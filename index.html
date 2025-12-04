@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cozy Study Island</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <h1>Cozy Study Island</h1>
+
+  <main>
+    <div class="left-column">
+      <!-- UI BAR -->
+      <div class="ui-bar">
+        <div>
+          <div class="coins">
+            Logged in as: <span id="currentUserLabel">Player</span> ·
+            Currency: <span id="coinCount">0</span> 🍄
+          </div>
+          <div class="badge">1 minute = 1 🍄 · Focus to grow your forest</div>
+        </div>
+
+        <div class="study-controls">
+          Study for
+          <input type="number" id="minutesInput" min="1" value="5" /> min
+          <button id="startStudyBtn">Start Study</button>
+          <button id="openShopBtn">Shop</button>
+          <button id="toggleViewBtn">Go to Room</button>
+          <button id="feedPetBtn">Feed Pet</button>
+          <button id="zoomOutBtn">-</button>
+          <button id="zoomInBtn">+</button>
+          <button id="fullscreenBtn">Full Screen</button>
+          <span class="hint">Food: <span id="foodCount">0</span></span>
+        </div>
+
+        <div class="owned-items">
+          Owned decor: <span id="ownedItemsList">none yet</span>
+        </div>
+      </div>
+
+      <!-- GAME AREA -->
+      <div class="game outside-view" id="gameArea">
+        <div id="player">
+          <img id="playerSprite" src="img/char_girl1.png" alt="player" />
+        </div>
+
+        <!-- Pet that follows behind -->
+        <div id="petContainer">
+          <img id="petHeart" src="img/heart_low.png" alt="pet heart" />
+          <img id="petSprite" src="img/pet_cat.png" alt="pet" />
+        </div>
+
+        <!-- Room items (when in room view) -->
+        <div id="roomItemsLayer"></div>
+
+        <!-- STUDY OVERLAY -->
+        <div class="overlay" id="studyOverlay">
+          <div class="overlay-box">
+            <h2>Focus Time</h2>
+            <p>Stay on your real-life work while the timer counts down.</p>
+            <div class="big-timer" id="studyTimerDisplay">00:00</div>
+            <div class="bubble-track" id="bubbleContainer"></div>
+            <p class="overlay-note">
+              Keep the website open and focus on your task. When the
+              timer ends, you will earn 🍄 to spend in the shop.
+            </p>
+          </div>
+        </div>
+
+        <!-- SHOP OVERLAY -->
+        <div class="overlay" id="shopOverlay">
+          <div class="overlay-box shop-box">
+            <h2>Forest Shop</h2>
+            <p>
+              Spend your 🍄 on cozy items or a pet companion. Pets can be
+              fed with snacks you buy here.
+            </p>
+            <div class="shop-coins">
+              Current: <span id="shopCoinsDisplay">0</span> 🍄
+            </div>
+
+            <div id="shopItemsContainer" class="shop-items-grid"></div>
+
+            <div class="shop-footer">
+              <button id="closeShopBtn">Close Shop</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHARACTER SELECT -->
+        <div class="overlay" id="characterOverlay">
+          <div class="overlay-box">
+            <h2>Choose Your Character</h2>
+            <p style="font-size: 0.9rem;">
+              Pick the character you want to explore the island with.
+            </p>
+            <div class="char-grid">
+              <button class="char-card" data-char-id="girl1" data-src="img/char_girl1.png">
+                <img src="img/char_girl1.png" alt="Girl 1" />
+                <span>Girl 1</span>
+              </button>
+              <button class="char-card" data-char-id="girl2" data-src="img/char_girl2.png">
+                <img src="img/char_girl2.png" alt="Girl 2" />
+                <span>Girl 2</span>
+              </button>
+              <button class="char-card" data-char-id="boy1" data-src="img/char_boy1.png">
+                <img src="img/char_boy1.png" alt="Boy 1" />
+                <span>Boy 1</span>
+              </button>
+              <button class="char-card" data-char-id="boy2" data-src="img/char_boy2.png">
+                <img src="img/char_boy2.png" alt="Boy 2" />
+                <span>Boy 2</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- end .game -->
+    </div>
+  </main>
+
+  <!-- Load JS at the end so all elements exist -->
+  <script src="js/game.js"></script>
+</body>
+</html>

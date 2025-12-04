@@ -15,82 +15,338 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  color: #254030;
 }
 
 h1 {
-  margin-top: 10px;
-  font-size: 1.4rem;
-  color: var(--green-dark);
-  text-shadow: 0 1px 0 rgba(255,255,255,0.8);
+  margin-top: 16px;
+  margin-bottom: 8px;
+  font-size: 1.6rem;
+  color: #254030;
+  text-shadow: 0 2px 4px rgba(53,83,65,0.2);
 }
 
 main {
-  display: flex;
-  flex-direction: row;
-  gap: 12px;
-  padding-bottom: 16px;
+  width: 100%;
+  max-width: 1200px;
+  padding: 12px;
 }
 
+/* Layout */
+
 .left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* UI Bar */
+
+.ui-bar {
+  background: var(--cream);
+  border-radius: 16px;
+  border: 1px solid var(--border-soft);
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(33,59,45,0.15);
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* ==== UI BAR ==== */
-.ui-bar {
-  width: 1100px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 12px;
-  border-radius: 14px;
-  background: rgba(249,253,250,0.98);
-  border: 2px solid #b8d4c3;
-  box-shadow: 0 4px 10px rgba(33,59,45,0.12);
-  color: var(--green-dark);
+.coins {
+  font-size: 0.9rem;
+  color: #2c4737;
 }
 
-.coins { font-weight: 600; }
-
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
+  display: inline-block;
+  margin-top: 4px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: #e4f2e8;
+  background: #e1f3e8;
+  color: #366047;
   font-size: 0.75rem;
+  border: 1px solid #b1d8c0;
 }
 
 .study-controls {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
   flex-wrap: wrap;
-  justify-content: flex-end;
+  gap: 6px;
+  align-items: center;
+  font-size: 0.9rem;
 }
 
-input[type="number"] {
-  width: 70px;
-  padding: 5px 8px;
-  border-radius: 9px;
-  border: 1px solid #b2cfbd;
-  text-align: center;
-  font-size: 0.9rem;
-  background: #f7fbf8;
+.study-controls input[type="number"] {
+  width: 60px;
+  padding: 3px 6px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  font-size: 0.85rem;
 }
+
+.hint {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Owned items bar */
+
+.owned-items {
+  font-size: 0.8rem;
+  padding-top: 4px;
+  border-top: 1px dashed #c1dacb;
+}
+
+/* Game area */
+
+.game {
+  position: relative;
+  margin-top: 10px;
+  width: 1100px;
+  height: 600px;
+  border-radius: 18px;
+  overflow: hidden;
+  background-color: #94cfa8;
+  border: 2px solid #5e9174;
+  box-shadow: 0 10px 24px rgba(19,47,33,0.35);
+  transform-origin: center center; /* for zoom */
+}
+
+/* Outside vs room view */
+
+.game.outside-view {
+  background-size: cover;
+  background-position: center;
+}
+
+.game.room-view {
+  background: radial-gradient(circle at top, #fdf5e6, #f1e0c9);
+}
+
+/* Player + pet */
+
+#player {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#playerSprite {
+  width: 64px;
+  image-rendering: pixelated;
+}
+
+#petContainer {
+  position: absolute;
+  left: calc(50% - 70px);
+  top: calc(50% + 10px);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+#petSprite {
+  width: 42px;
+  image-rendering: pixelated;
+}
+
+#petHeart {
+  width: 20px;
+}
+
+/* Room items inside room-view */
+
+#roomItemsLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.room-item {
+  position: absolute;
+  font-size: 2rem;
+}
+
+/* Overlays */
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(12, 30, 22, 0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.overlay-box {
+  background: var(--cream);
+  border-radius: 18px;
+  padding: 20px 24px;
+  min-width: 320px;
+  max-width: 420px;
+  box-shadow: 0 10px 24px rgba(18,42,29,0.45);
+  border: 1px solid var(--border-soft);
+}
+
+.overlay-box h2 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 1.3rem;
+}
+
+.overlay-box p {
+  margin-top: 4px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+/* Study overlay specifics */
+
+.big-timer {
+  font-size: 2.4rem;
+  font-weight: 600;
+  text-align: center;
+  margin: 10px 0 6px;
+  letter-spacing: 0.08em;
+  color: #2f5d45;
+}
+
+.bubble-track {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  margin: 8px 0 6px;
+  background: #e2f5eb;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #b8dac5;
+}
+
+.overlay-note {
+  font-size: 0.8rem;
+  color: #466652;
+}
+
+/* Leaf bubbles */
+
+.leaf-bubble {
+  position: absolute;
+  bottom: -20px;
+  font-size: 1.1rem;
+  animation: floatUp 3s ease-out forwards;
+  opacity: 0.9;
+}
+
+@keyframes floatUp {
+  0%   { transform: translateY(0); opacity: 0; }
+  10%  { opacity: 1; }
+  100% { transform: translateY(-90px); opacity: 0; }
+}
+
+/* Shop */
+
+.shop-box {
+  max-width: 520px;
+}
+
+.shop-coins {
+  margin: 6px 0 10px;
+  font-size: 0.9rem;
+  color: #2f5b43;
+}
+
+.shop-items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.shop-item {
+  background: #f4fbf7;
+  border-radius: 12px;
+  padding: 8px;
+  border: 1px solid #c4e0cf;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.shop-item-emoji {
+  font-size: 1.6rem;
+}
+
+.shop-item button {
+  margin-top: 4px;
+  padding: 3px 10px;
+  font-size: 0.8rem;
+}
+
+.shop-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 4px;
+}
+
+/* Character select */
+
+.char-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.char-card {
+  border-radius: 14px;
+  border: 1px solid #bfdac8;
+  background: #f5fbf7;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(23,52,36,0.2);
+}
+
+.char-card img {
+  width: 60px;
+  height: auto;
+}
+
+.char-card span {
+  font-size: 0.85rem;
+}
+
+/* Interaction prompt (currently unused but harmless) */
+
+.interaction-prompt {
+  position: absolute;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fdf8ee;
+  font-size: 0.85rem;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  pointer-events: none;
+  display: none;
+}
+
+/* Buttons */
 
 button {
-  border: none;
   border-radius: 999px;
-  padding: 6px 14px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
+  padding: 4px 10px;
+  border: 1px solid #5b8f71;
   background: #9fd7b1;
   color: #254030;
   box-shadow: 0 2px 4px rgba(22,48,32,0.2);
@@ -106,253 +362,28 @@ button:hover:not(:disabled) {
 button:disabled {
   opacity: 0.55;
   cursor: default;
-  box-shadow: none;
 }
 
-.hint {
-  font-size: 0.8rem;
-  color: #5f7e6d;
+/* Responsive */
+
+@media (max-width: 1200px) {
+  .game {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
-.owned-items {
-  width: 1100px;
-  font-size: 0.8rem;
-  background: rgba(251,255,252,0.96);
-  border-radius: 12px;
-  border: 1px dashed #b5ccb8;
-  padding: 6px 10px;
-  color: #3c5644;
+@media (max-width: 900px) {
+  main {
+    padding: 8px;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  .ui-bar {
+    padding: 10px 12px;
+  }
 }
 
-/* ==== GAME AREA ==== */
-.game {
-  position: relative;
-  width: 1100px;
-  height: 650px;
-  border-radius: 20px;
-  overflow: hidden;
-  border: 3px solid var(--border-soft);
-  box-shadow: 0 6px 16px rgba(44,71,56,0.18);
-  background-repeat: no-repeat;
-  background-position: 0 0;
-  transition: background 0.3s ease;
-  transform-origin: center center; 
-}
-
-.game.outside-view {
-  background-image: url("../img/forest_world_large.png");
-  background-size: 2000px 2000px; /* image should be bigger than 800x450 */
-}
-
-.game.room-view {
-  background-image: linear-gradient(#fdf8ee 62%, #e2cbb0 62%);
-  background-size: cover;
-}
-
-#player {
-  position: absolute;
-  width: 80px;
-  height: 110px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  z-index: 3;
-}
-
-#player img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* PET */
-#petContainer {
-  position: absolute;
-  width: 80px;
-  height: 110px;
-  top: 58%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: none;
-  pointer-events: none;
-  z-index: 2;
-}
-
-#petSprite {
-  width: 70px;
-  height: 90px;
-  object-fit: contain;
-  display: block;
-  margin: 0 auto;
-}
-
-#petHeart {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translate(-50%, 4px);
-  width: 30px;
-  height: auto;
-}
-
-/* Room items */
-#roomItemsLayer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  display: none;
-  padding-bottom: 40px;
-}
-
-.game.room-view #roomItemsLayer {
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  gap: 16px;
-}
-
-.room-item {
-  width: 64px;
-  height: 64px;
-  border-radius: 18px;
-  background: rgba(255,255,255,0.9);
-  border: 2px solid #cddbc5;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.12);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2rem;
-}
-
-/* ==== OVERLAYS ==== */
-.overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  text-align: center;
-  padding: 20px;
-  z-index: 10;
-}
-
-.overlay-box {
-  background: rgba(39,56,46,0.97);
-  border-radius: 22px;
-  padding: 22px 30px;
-  min-width: 280px;
-  max-width: 520px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.35);
-}
-
-/* Character select */
-#characterOverlay .overlay-box {
-  background: linear-gradient(145deg, #324a3b, #283835);
-}
-
-#characterOverlay .characters {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 10px;
-}
-
-.char-card {
-  width: 100px;
-  height: 140px;
-  border-radius: 22px;
-  background: #f4fbf6;
-  border: 2px solid #c5e2cf;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
-  color: var(--green-dark);
-}
-
-.char-card img {
-  width: 70px;
-  height: 90px;
-  object-fit: contain;
-}
-
-.char-card small { font-size: 0.7rem; }
-
-.char-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.18);
-  border-color: var(--green-mid);
-}
-
-/* Study overlay */
-#studyTimerDisplay {
-  font-size: 2.1rem;
-  margin: 10px 0;
-}
-
-#bubbleContainer {
-  position: relative;
-  width: 100%;
-  height: 150px;
-  margin-top: 10px;
-  overflow: hidden;
-}
-
-.leaf-bubble {
-  position: absolute;
-  bottom: -40px;
-  border-radius: 999px;
-  padding: 6px 10px;
-  background: rgba(255,255,255,0.16);
-  border: 1px solid rgba(255,255,255,0.85);
-  backdrop-filter: blur(5px);
-  font-size: 1.4rem;
-  animation: floatUp 4s ease-out forwards;
-}
-
-@keyframes floatUp {
-  0%   { transform: translateY(0)   scale(0.8); opacity: 0.1; }
-  20%  { opacity: 1; }
-  100% { transform: translateY(-140px) scale(1.1); opacity: 0; }
-}
-
-/* Shop overlay */
-#shopOverlay .overlay-box {
-  background: radial-gradient(circle at top, #f2fbf5, #e9f1ff);
-  color: #33483b;
-}
-
-.shop-items {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-  margin-top: 10px;
-}
-
-.shop-item {
-  width: 120px;
-  border-radius: 22px;
-  background: #fff;
-  border: 2px solid #cbe0cc;
-  padding: 8px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.8rem;
-}
-
-.shop-item-emoji { font-size: 1.8rem; }
-.shop-item button { padding: 4px 10px; font-size: 0.75rem; background:#f6cfdc; }
