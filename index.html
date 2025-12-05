@@ -17,7 +17,7 @@
             Logged in as: <span id="currentUserLabel">Player</span> ·
             Currency: <span id="coinCount">0</span> 🍄
           </div>
-          <div class="badge">1 minute = 1 🍄 · Focus to grow your forest</div>
+          <div class="badge">1 click = 1 🍄 · Focus to get paid </div>
         </div>
 
         <div class="study-controls">
@@ -59,10 +59,14 @@
             <h2>Focus Time</h2>
             <p>Stay on your real-life work while the timer counts down.</p>
             <div class="big-timer" id="studyTimerDisplay">00:00</div>
-            <div class="bubble-track" id="bubbleContainer"></div>
+            <div class="bubble-track">
+              <img src="img/focusGirl.gif" class="focus-gif" alt="gif">
+              <div id="bubbleContainer"></div> <!-- JS manipulates only this -->
+            </div>
+
             <p class="overlay-note">
-              Keep the website open and focus on your task. When the
-              timer ends, you will earn 🍄 to spend in the shop.
+              Keep the website open and focus on your task. When you end 
+              the timer, you will earn 🍄 to spend in the shop.
             </p>
           </div>
         </div>
