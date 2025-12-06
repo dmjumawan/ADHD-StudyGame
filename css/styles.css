@@ -217,13 +217,14 @@ main {
 .bubble-track {
   position: relative;
   width: 100%;
-  height: 80px;
-  margin: 8px 0 6px;
+  height: 150px;
+  margin: 8px 0;
   background: #e2f5eb;
   border-radius: 14px;
   overflow: hidden;
   border: 1px solid #b8dac5;
 }
+
 
 .overlay-note {
   font-size: 0.8rem;
@@ -385,5 +386,75 @@ button:disabled {
   .ui-bar {
     padding: 10px 12px;
   }
+}
+
+/* WORLD IMAGE */
+#worldImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3000px;
+  height: 3000px;
+  z-index: 0; /* behind player and HUD */
+}
+
+/* POND BUTTONS */
+.pond-btn {
+  position: absolute;
+  border: 3px solid rgba(255,0,0,0.5);
+  background: rgba(255,255,255,0.01);
+  cursor: pointer;
+  z-index: 20;
+  border-radius: 50%;
+}
+
+.fishing-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: rgba(0,0,0,0.6);
+  z-index: 9999;
+}
+
+#fishingBox {
+  background: #eef7ea;
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.fishing-gif {
+  width: 300px;
+  height: auto;
+  margin-bottom: 20px;
+}
+
+/* Café view background */
+.cafe-view {
+  background: url("../img/cafe.png") no-repeat center/cover;
+}
+
+.cafe-view #player {
+  position: absolute;
+  z-index: 10; /* make sure character stays on top */
+}
+
+.cafe-view #petContainer {
+  position: absolute;
+  z-index: 9;
+}
+
+.focus-gif {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 90px;       /* fits inside box */
+  max-width: 90%;      /* prevents sides from overflowing */
+  object-fit: contain; /* keeps it centered */
+  pointer-events: none;
 }
 

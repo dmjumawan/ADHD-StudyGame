@@ -25,7 +25,7 @@
           <input type="number" id="minutesInput" min="1" value="5" /> min
           <button id="startStudyBtn">Start Study</button>
           <button id="openShopBtn">Shop</button>
-          <button id="toggleViewBtn">Go to Room</button>
+          <button id="toggleViewBtn">Go to Café</button>
           <button id="feedPetBtn">Feed Pet</button>
           <button id="zoomOutBtn">-</button>
           <button id="zoomInBtn">+</button>
@@ -40,6 +40,20 @@
 
       <!-- GAME AREA -->
       <div class="game outside-view" id="gameArea">
+        <!-- WORLD IMAGE + CLICKABLE PONDS -->
+        <img id="worldImage" src="img/forest_world_large.png" alt="Forest World">
+
+        <button id="pond1-btn" class="pond-btn"></button>
+        <button id="pond2-btn" class="pond-btn"></button>
+        .pond-btn {
+          position: absolute;
+          border: 3px solid rgba(255, 0, 0, 0.5);
+          background: rgba(255, 255, 255, 0.01);
+          cursor: pointer;
+          z-index: 20;
+          border-radius: 50%;
+        }
+
         <div id="player">
           <img id="playerSprite" src="img/char_girl1.png" alt="player" />
         </div>
@@ -60,10 +74,19 @@
             <p>Stay on your real-life work while the timer counts down.</p>
             <div class="big-timer" id="studyTimerDisplay">00:00</div>
             <div class="bubble-track" id="bubbleContainer"></div>
+              <img id="focusGif" class="focus-gif" src="img/focusGirl.gif" alt="gif">
+              <div id="bubbleContainer"></div>
             <p class="overlay-note">
               Keep the website open and focus on your task. When the
               timer ends, you will earn 🍄 to spend in the shop.
             </p>
+          </div>
+        </div>
+        <!-- FISHING POPUP OVERLAY -->
+        <div class="overlay" id="fishingOverlay" style="display: none;">
+          <div class="overlay-box" id="fishingBox">
+            <img id="fishingGif" src="img/fishing.gif" alt="Fishing GIF">
+            <p id="catchMessage" style="display: none;">You caught a ???!</p>
           </div>
         </div>
 
