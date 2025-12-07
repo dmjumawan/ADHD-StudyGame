@@ -17,24 +17,19 @@
             Logged in as: <span id="currentUserLabel">Player</span> ·
             Currency: <span id="coinCount">0</span> 🍄
           </div>
-          <div class="badge">1 minute = 1 🍄 · Focus to grow your forest</div>
         </div>
 
         <div class="study-controls">
-          Study for
-          <input type="number" id="minutesInput" min="1" value="5" /> min
           <button id="startStudyBtn">Start Study</button>
+          <button id="stopStudyBtn" disabled>Stop Study</button>
           <button id="openShopBtn">Shop</button>
+          <button id="openInventoryBtn">Inventory</button>
           <button id="toggleViewBtn">Go to Café</button>
           <button id="feedPetBtn">Feed Pet</button>
           <button id="zoomOutBtn">-</button>
           <button id="zoomInBtn">+</button>
           <button id="fullscreenBtn">Full Screen</button>
           <span class="hint">Food: <span id="foodCount">0</span></span>
-        </div>
-
-        <div class="owned-items">
-          Owned decor: <span id="ownedItemsList">none yet</span>
         </div>
       </div>
 
@@ -45,14 +40,6 @@
 
         <button id="pond1-btn" class="pond-btn"></button>
         <button id="pond2-btn" class="pond-btn"></button>
-        .pond-btn {
-          position: absolute;
-          border: 3px solid rgba(255, 0, 0, 0.5);
-          background: rgba(255, 255, 255, 0.01);
-          cursor: pointer;
-          z-index: 20;
-          border-radius: 50%;
-        }
 
         <div id="player">
           <img id="playerSprite" src="img/char_girl1.png" alt="player" />
@@ -68,18 +55,15 @@
         <div id="roomItemsLayer"></div>
 
         <!-- STUDY OVERLAY -->
-        <div class="overlay" id="studyOverlay">
+        <div class="overlay" id="studyOverlay" tabindex="0">
           <div class="overlay-box">
-            <h2>Focus Time</h2>
-            <p>Stay on your real-life work while the timer counts down.</p>
-            <div class="big-timer" id="studyTimerDisplay">00:00</div>
+            <h2>Studying</h2>
+            <p>Work on your task while this overlay is open. Your session will be recorded.</p>
+            <div class="big-timer" id="studyTimer">00:00</div>
+            <p style="font-size: 0.9rem; margin-top: 0;">1 mushroom per minute</p>
             <div class="bubble-track" id="bubbleContainer"></div>
-              <img id="focusGif" class="focus-gif" src="img/focusGirl.gif" alt="gif">
-              <div id="bubbleContainer"></div>
-            <p class="overlay-note">
-              Keep the website open and focus on your task. When the
-              timer ends, you will earn 🍄 to spend in the shop.
-            </p>
+            <img id="focusGif" class="focus-gif" src="img/focusGirl.gif" alt="gif">
+            <button id="stopStudyOverlayBtn">Stop Studying</button>
           </div>
         </div>
         <!-- FISHING POPUP OVERLAY -->
@@ -137,12 +121,56 @@
             </div>
           </div>
         </div>
+
+        <!-- INVENTORY OVERLAY -->
+        <div class="overlay" id="inventoryOverlay" style="display: none;">
+          <div class="overlay-box inventory-box">
+            <h2>Inventory</h2>
+            <button id="closeInventoryBtn" style="float: right;">×</button>
+            
+            <h3>🐾 Owned Pets</h3>
+            <div id="ownedPetsContainer" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;"></div>
+            
+            <h3>🐟 Fish</h3>
+            <div id="fishContainer" style="margin-bottom: 20px;"></div>
+            
+            <h3>🍖 Snacks</h3>
+            <div id="snacksContainer" style="margin-bottom: 20px;"></div>
+          </div>
+        </div>
+
+        <!-- CAFE CHAT BOX -->
+        <div id="chatBox" class="chat-box" style="display: none;">
+          <div class="chat-header">
+            <h3>Cafe Chat</h3>
+            <button id="closeChatBtn" class="close-chat-btn">×</button>
+          </div>
+          <div id="chatMessages" class="chat-messages"></div>
+          <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="Say something..." maxlength="100">
+            <button id="sendChatBtn">Send</button>
+          </div>
+        </div>
+
+        <!-- CHAT TOGGLE BUTTON -->
+        <button id="openChatBtn" class="open-chat-btn" style="display: none;">💬</button>
+
+        <!-- TAB NOTIFICATION POPUP -->
+        <div id="tabNotification" class="tab-notification" style="display: none;">
+          <div class="tab-notification-content">
+            <h3>Still studying? 👋</h3>
+            <p>Don't forget to keep this tab open while your session runs.</p>
+            <button id="closeTabNotification" class="tab-close-btn">Got it</button>
+          </div>
+        </div>
       </div>
       <!-- end .game -->
     </div>
   </main>
 
-  <!-- Load JS at the end so all elements exist -->
-  <script src="js/game.js"></script>
+  <!-- Load JS at the end so all elements exist (cache-busted) -->
+  <!-- Version query param forces browsers/CDNs to fetch the updated file -->
+  <script src="js/hostinger-api.js?v=2"></script>
+  <script src="js/game.js?v=2"></script>
 </body>
 </html>
