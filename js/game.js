@@ -1,12 +1,24 @@
 // Initialize Hostinger API (will be created on page load)
 var hostingerAPI;
 
+// Multiplayer state
+const multiplayerState = {
+  isLoggedIn: false,
+  currentLocation: 'world',
+  otherPlayers: {},
+  chatMessages: [],
+  lastChatId: 0,
+  updateInterval: null,
+  chatUpdateInterval: null
+};
+
 // ------------------ BASIC STATE ------------------
 const playerState = {
   name: 'Player',
   currency: 0,
-  characterId: 'girl1',
+  characterId: null,
   items: [],
+  ownedPets: [],
   // inventory holds counts of consumables and caught fish
   inventory: {
     salmon: 0,
@@ -16,24 +28,24 @@ const playerState = {
   completedSessions: 0,
   petType: null,
   petHunger: 0,
-  petFood: 0
+  petFood: 0,
+  x: 250,
+  y: 250
 };
 
 const shopItems = [
-  { id: 'pet_cat', name: 'Cat', price: 50, emoji: '🐱', category: 'pet', petType: 'cat', imgSrc: 'img/pet_cat.png' },
-  { id: 'pet_dog', name: 'Dog', price: 50, emoji: '🐶', category: 'pet', petType: 'dog', imgSrc: 'img/pet_dog.png' },
-  { id: 'pet_chicken', name: 'Chicken', price: 50, emoji: '🐔', category: 'pet', petType: 'chicken', imgSrc: 'img/chicken.png' },
+  { id: 'pet_cat', name: 'Cat', price: 1, emoji: '🐱', category: 'pet', petType: 'cat', imgSrc: 'img/pet_cat.png' },
+  { id: 'pet_dog', name: 'Dog', price: 1, emoji: '🐶', category: 'pet', petType: 'dog', imgSrc: 'img/pet_dog.png' },
+  { id: 'pet_chicken', name: 'Chicken', price: 5, emoji: '🐔', category: 'pet', petType: 'chicken', imgSrc: 'img/chicken.png' },
   { id: 'pet_deer', name: 'Deer', price: 50, emoji: '🦌', category: 'pet', petType: 'deer', imgSrc: 'img/deer.png' },
   { id: 'pet_fox', name: 'Fox', price: 50, emoji: '🦊', category: 'pet', petType: 'fox', imgSrc: 'img/fox.png' },
   { id: 'pet_hamster', name: 'Hamster', price: 50, emoji: '�', category: 'pet', petType: 'hamster', imgSrc: 'img/hamster.png' },
-  { id: 'pet_hedgehog', name: 'Hedgehog', price: 50, emoji: '🦔', category: 'pet', petType: 'hedgehog', imgSrc: 'img/hedgehog.png' },
+  { id: 'pet_hedgehog', name: 'Hedgehog', price: 5, emoji: '🦔', category: 'pet', petType: 'hedgehog', imgSrc: 'img/hedgehog.png' },
   { id: 'pet_jellycat', name: 'Jellycat', price: 50, emoji: '🪼', category: 'pet', petType: 'jellycat', imgSrc: 'img/jellycat.png' },
   { id: 'pet_sloth', name: 'Sloth', price: 50, emoji: '🦥', category: 'pet', petType: 'sloth', imgSrc: 'img/sloth.png' },
+  { id: 'pet_cloud', name: 'Cloud', price: 50, emoji: '☁️', category: 'pet', petType: 'cloud', imgSrc: 'img/cloud.png' },
+  { id: 'pet_succulent', name: 'Succulent', price: 50, emoji: '🌵', category: 'pet', petType: 'succulent', imgSrc: 'img/succulent.png' },
   { id: 'pet_snack', name: 'Pet Snack', price: 1, emoji: '🍖', category: 'food' },
-  { id: 'flower_hat', name: 'Flower Hat', price: 10, emoji: '🌼', category: 'decor' },
-  { id: 'mushroom_lamp', name: 'Mushroom Lamp', price: 20, emoji: '🍄', category: 'decor' },
-  { id: 'leaf_rug', name: 'Leaf Rug', price: 12, emoji: '🍃', category: 'decor' },
-  { id: 'tea_set', name: 'Tea Set', price: 15, emoji: '🍵', category: 'decor' }
 ];
 
 const CURRENCY_ICON = "🍄";
@@ -49,6 +61,7 @@ const petHeart          = document.getElementById('petHeart');
 const roomItemsLayer    = document.getElementById('roomItemsLayer');
 const coinCountSpan     = document.getElementById('coinCount');
 const currentUserLabel  = document.getElementById('currentUserLabel');
+const onlineCountSpan   = document.getElementById('onlineCount');
 const minutesInput      = document.getElementById('minutesInput');
 const startBtn          = document.getElementById('startStudyBtn');
 const stopBtn           = document.getElementById('stopStudyBtn');
@@ -65,9 +78,19 @@ const shopItemsContainer= document.getElementById('shopItemsContainer');
 const shopCoinsDisplay  = document.getElementById('shopCoinsDisplay');
 const closeShopBtn      = document.getElementById('closeShopBtn');
 const characterOverlay  = document.getElementById('characterOverlay');
+const loginOverlay      = document.getElementById('loginOverlay');
+const usernameInput     = document.getElementById('usernameInput');
+const loginBtn          = document.getElementById('loginBtn');
 const fullscreenBtn     = document.getElementById('fullscreenBtn');
 const zoomInBtn         = document.getElementById('zoomInBtn');
 const zoomOutBtn        = document.getElementById('zoomOutBtn');
+const otherPlayersLayer = document.getElementById('otherPlayersLayer');
+const openChatBtn       = document.getElementById('openChatBtn');
+const chatBox           = document.getElementById('chatBox');
+const chatMessagesDiv   = document.getElementById('chatMessages');
+const chatInput         = document.getElementById('chatInput');
+const sendChatBtn       = document.getElementById('sendChatBtn');
+const closeChatBtn      = document.getElementById('closeChatBtn');
 // studyKeycapture, focusHint and related keypress-capture elements were removed from the UI
 
 const pond1Btn          = document.getElementById("pond1-btn");
@@ -77,12 +100,6 @@ const worldImg          = document.getElementById("worldImage");
 const fishingOverlay    = document.getElementById("fishingOverlay");
 const fishingGif        = document.getElementById("fishingGif");
 const catchMessage      = document.getElementById("catchMessage");
-
-const chatBox           = document.getElementById("chatBox");
-const chatMessages      = document.getElementById("chatMessages");
-const chatInput         = document.getElementById("chatInput");
-const sendChatBtn       = document.getElementById("sendChatBtn");
-const closeChatBtn      = document.getElementById("closeChatBtn");
 
 const tabNotification   = document.getElementById("tabNotification");
 const tabKeypressCount  = document.getElementById("tabKeypressCount");
@@ -101,6 +118,7 @@ const WORLD_W = 3000, WORLD_H = 3000;
 let playerX = 1550, playerY = 2425;
 let isStudying = false;
 let inCafe = false;
+let presenceUpdateTimeout = null;
 
 function updatePlayerPosition() {
   if (!inCafe) {
@@ -118,6 +136,22 @@ function updatePlayerPosition() {
     player.style.top = playerY + "px";
     gameArea.style.backgroundPosition = "center";
   }
+
+  // Position pet to trail the player
+  if (petContainer && petContainer.style.display !== 'none') {
+    if (!inCafe) {
+      petContainer.style.left = (VIEW_W / 2 - 30) + 'px';
+      petContainer.style.top  = (VIEW_H / 2 + 20) + 'px';
+    } else {
+      petContainer.style.left = (playerX - 30) + 'px';
+      petContainer.style.top  = (playerY + 20) + 'px';
+    }
+  }
+
+  // Sync state for presence updates
+  playerState.x = playerX;
+  playerState.y = playerY;
+  if (multiplayerState.isLoggedIn) schedulePresenceUpdate();
 }
 
 // ------------------ ZOOM ------------------
@@ -126,6 +160,12 @@ const MIN_ZOOM = 0.8, MAX_ZOOM = 1.6, ZOOM_STEP = 0.1;
 function updateZoom() { gameArea.style.transform = `scale(${zoomLevel})`; }
 zoomInBtn.addEventListener('click', ()=>{zoomLevel=Math.min(MAX_ZOOM,zoomLevel+ZOOM_STEP);updateZoom();});
 zoomOutBtn.addEventListener('click', ()=>{zoomLevel=Math.max(MIN_ZOOM,zoomLevel-ZOOM_STEP);updateZoom();});
+
+// ------------------ LOGIN ------------------
+if (loginBtn) {
+  loginBtn.addEventListener('click', handleLogin);
+  usernameInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') handleLogin(); });
+}
 
 // ------------------ FULLSCREEN ------------------
 fullscreenBtn.addEventListener('click', ()=>{
@@ -137,12 +177,22 @@ fullscreenBtn.addEventListener('click', ()=>{
 });
 
 // ------------------ CHARACTER SELECT ------------------
+function applyCharacterSelection(charId, src){
+  playerState.characterId = charId;
+  playerSprite.src = src || `img/char_${charId}.png`;
+  const username = playerState.name || localStorage.getItem('studyshroom_username') || 'player';
+  localStorage.setItem(`studyshroom_char_selected_${username}`, '1');
+  // Save the actual character choice so we can restore it on page refresh
+  localStorage.setItem(`studyshroom_selected_char_${username}`, charId);
+  characterOverlay.style.display = 'none';
+  hostingerAPI.savePlayer(playerState);
+  updatePlayerPosition();
+}
+
 document.querySelectorAll('.char-card').forEach(card=>{
   card.addEventListener('click', ()=>{
     console.log('Character selected:', card.dataset.charId);
-    playerState.characterId = card.dataset.charId;
-    playerSprite.src = card.dataset.src;
-    characterOverlay.style.display = 'none';
+    applyCharacterSelection(card.dataset.charId, card.dataset.src);
     console.log('Character overlay hidden, player sprite updated to:', card.dataset.src);
   });
 });
@@ -206,6 +256,7 @@ feedPetBtn.addEventListener('click',()=>{
   playerState.petHunger++;
   updateHUD();
   updatePetUI();
+  hostingerAPI.savePlayer(playerState);
 });
 
 // ------------------ STUDY SYSTEM (DURATION-BASED, WITH TIMER AND MUSHROOM REWARDS) ------------------
@@ -342,17 +393,22 @@ function renderShopItems(){
     // Use PNG image for pets, emoji for others
     if(item.category==='pet' && item.imgSrc){
       const img=document.createElement('img');
-      img.src=item.imgSrc;
-      img.style.width='60px';
-      img.style.height='60px';
+      const timestamp = new Date().getTime();
+      img.src=`${item.imgSrc}?t=${timestamp}`;
+      img.style.width='70px';
+      img.style.height='70px';
       img.style.objectFit='contain';
       // Fallback to emoji if image fails to load
       img.onerror=()=>{
+        console.error(`Failed to load pet image: ${item.imgSrc}`);
         img.style.display='none';
         const em=document.createElement('div');
         em.className='shop-item-emoji';
         em.textContent=item.emoji;
         div.insertBefore(em, div.firstChild);
+      };
+      img.onload=()=>{
+        console.log(`Successfully loaded pet image: ${item.imgSrc}`);
       };
       div.appendChild(img);
     } else {
@@ -415,19 +471,23 @@ function renderInventory(){
     div.style.borderRadius = '8px';
     
     const img = document.createElement('img');
-    img.src = petItem.imgSrc;
+    const timestamp = new Date().getTime();
+    img.src = `${petItem.imgSrc}?t=${timestamp}`;
     img.style.width = '80px';
     img.style.height = '80px';
     img.style.objectFit = 'contain';
     img.style.objectPosition = 'center';
     // Fallback to emoji if image fails to load
     img.onerror = ()=>{
+      console.error(`Failed to load inventory pet image: ${petItem.imgSrc}`);
       img.style.display='none';
       const em=document.createElement('div');
       em.style.fontSize='2.5rem';
       em.textContent=petItem.emoji;
       div.insertBefore(em, div.firstChild);
-
+    };
+    img.onload = ()=>{
+      console.log(`Successfully loaded inventory pet image: ${petItem.imgSrc}`);
     };
     div.appendChild(img);
     
@@ -505,8 +565,11 @@ toggleViewBtn.addEventListener('click',()=>{
     gameArea.style.backgroundPosition='center';
     toggleViewBtn.textContent='Go Outside';
     playerX=VIEW_W/2; playerY=VIEW_H/2;
+    multiplayerState.currentLocation = 'cafe';
     chatBox.style.display='flex';
-    chatBtn.style.display='none';
+    if (openChatBtn) openChatBtn.style.display='none';
+    multiplayerState.lastChatId = 0; // reset to fetch latest
+    fetchChatMessages();
   }else{
     gameArea.classList.remove('cafe-view');
     gameArea.classList.add('outside-view');
@@ -514,11 +577,16 @@ toggleViewBtn.addEventListener('click',()=>{
     gameArea.style.backgroundImage='none';
     toggleViewBtn.textContent='Go to Café';
     playerX=1550; playerY=2425;
+    multiplayerState.currentLocation = 'world';
     chatBox.style.display='none';
-    chatBtn.style.display='none';
+    if (openChatBtn) openChatBtn.style.display='none';
   }
   updatePlayerPosition();
   updatePondButtons();
+  if (multiplayerState.isLoggedIn) {
+    updatePlayerPresence();
+    fetchOnlinePlayers();
+  }
 });
 
 // ------------------ HUD ------------------
@@ -533,6 +601,13 @@ const ponds=[
   {btn:pond1Btn,worldX:870,worldY:690,width:100,height:100,fish:'Salmon'},
   {btn:pond2Btn,worldX:630,worldY:1890,width:110,height:110,fish:'Trout'}
 ];
+
+function schedulePresenceUpdate(){
+  if(presenceUpdateTimeout) clearTimeout(presenceUpdateTimeout);
+  presenceUpdateTimeout = setTimeout(()=>{
+    updatePlayerPresence();
+  }, 250);
+}
 
 function updatePondButtons(){
   if (inCafe) {
@@ -573,6 +648,7 @@ function showFishingPopup(pondNumber){
     catchMessage.textContent = `You caught a ${fishName}! (${playerState.inventory[normalizedKey]} now in inventory)`;
     catchMessage.style.display='block';
     updateHUD();
+    hostingerAPI.savePlayer(playerState);
   },3000);
 }
 pond1Btn.addEventListener('click',()=>showFishingPopup(1));
@@ -580,67 +656,267 @@ pond2Btn.addEventListener('click',()=>showFishingPopup(2));
 fishingOverlay.addEventListener('click',()=>{ fishingOverlay.style.display='none'; });
 
 // ------------------ CAFE CHAT ------------------
-const chatBtn           = document.getElementById("openChatBtn");
-
-function addChatMessage(text, isOwn=true){
-  const msgDiv = document.createElement('div');
-  msgDiv.className = isOwn ? 'chat-message own' : 'chat-message other';
-  msgDiv.textContent = text;
-  chatMessages.appendChild(msgDiv);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function sendMessage(){
+function sendChatMessage(){
   const text = chatInput.value.trim();
   if(!text) return;
-  addChatMessage(text, true);
-  chatInput.value = '';
+  chatInput.value='';
+  // optimistic append
+  const tempId = multiplayerState.lastChatId + 0.1;
+  multiplayerState.chatMessages.push({ id: tempId, username: playerState.name, message: text });
+  renderChatMessages();
+  hostingerAPI.sendChat(text, 'cafe').then(id=>{
+    if (id) {
+      multiplayerState.lastChatId = Math.max(multiplayerState.lastChatId, id);
+    }
+  });
 }
 
-sendChatBtn.addEventListener('click', sendMessage);
-chatInput.addEventListener('keypress', (e)=>{
-  if(e.key==='Enter') sendMessage();
-});
+sendChatBtn.addEventListener('click', sendChatMessage);
+chatInput.addEventListener('keypress', (e)=>{ if(e.key==='Enter') sendChatMessage(); });
 
 closeChatBtn.addEventListener('click', ()=>{ 
   chatBox.style.display='none';
-  chatBtn.style.display='block';
+  if (openChatBtn) openChatBtn.style.display='block';
 });
 
-chatBtn.addEventListener('click', ()=>{
-  chatBox.style.display='flex';
-  chatBtn.style.display='none';
-  chatInput.focus();
-});
-
-// Show/hide chat based on cafe view
-const originalToggle = toggleViewBtn.onclick;
-toggleViewBtn.addEventListener('click', ()=>{
-  setTimeout(()=>{
-    if(inCafe) chatBox.style.display='flex';
-    else chatBox.style.display='none';
-  }, 10);
-});
+if (openChatBtn) {
+  openChatBtn.addEventListener('click', ()=>{
+    chatBox.style.display='flex';
+    openChatBtn.style.display='none';
+    chatInput.focus();
+  });
+}
 
 // ------------------ INIT ------------------
-function init(){
-  // Load player data from Hostinger if available
-  hostingerAPI.loadPlayer().then(existingPlayer => {
-    if(existingPlayer) {
-      Object.assign(playerState, existingPlayer);
-      console.log('✅ Loaded player data from Hostinger');
-    } else {
-      console.log('ℹ️ New player - starting fresh');
-    }
-    updateHUD();
-    updatePetUI();
-  });
+// ==================== LOGIN SYSTEM ====================
+function startLogin() {
+  loginOverlay.style.display = 'flex';
+  usernameInput.focus();
+}
+
+function handleLogin() {
+  const username = usernameInput.value.trim();
+  if (!username) {
+    alert('Please enter a username');
+    return;
+  }
+
+  playerState.name = username;
+  localStorage.setItem('studyshroom_username', username);
+  if (hostingerAPI?.setUserIdFromUsername) {
+    hostingerAPI.setUserIdFromUsername(username);
+  }
+  multiplayerState.isLoggedIn = true;
+  loginOverlay.style.display = 'none';
   
+  currentUserLabel.textContent = username;
+  
+  // Start the game initialization
+  loadPlayerData();
+
+  // Persist name immediately
+  hostingerAPI.savePlayer(playerState);
+  
+  // Start multiplayer updates
+  startMultiplayerUpdates();
+  
+  console.log(`✅ Logged in as ${username}`);
+}
+
+async function loadPlayerData() {
+  const existingPlayer = await hostingerAPI.loadPlayer();
+  
+  // Restore username from localStorage immediately (before using it for flag lookups)
+  const storedUsername = localStorage.getItem('studyshroom_username');
+  if (storedUsername) {
+    playerState.name = storedUsername;
+  }
+  
+  const username = playerState.name; // Now use the restored username
+  
+  if(existingPlayer) {
+    // Check if this account has an explicit character selection saved BEFORE overwriting with server data
+    const charSelectionFlag = localStorage.getItem(`studyshroom_char_selected_${username}`);
+    const hasExplicitSelection = charSelectionFlag === '1';
+    
+    // Save the user's selected character if it exists
+    const userSelectedCharacter = hasExplicitSelection ? localStorage.getItem(`studyshroom_selected_char_${username}`) : null;
+
+    // Normalize items/inventory/ownedPets payload coming from server (stored inside items JSON)
+    const incomingItems = existingPlayer.items;
+    let serverItemsArray = [];
+    let serverInventory = {};
+    let serverOwnedPets = [];
+
+    if (Array.isArray(incomingItems)) {
+      serverItemsArray = incomingItems;
+    } else if (incomingItems && typeof incomingItems === 'object') {
+      serverItemsArray = incomingItems.items || [];
+      serverInventory = incomingItems.inventory || {};
+      serverOwnedPets = incomingItems.ownedPets || [];
+    }
+
+    Object.assign(playerState, existingPlayer);
+    playerState.items = serverItemsArray;
+    playerState.inventory = { ...playerState.inventory, ...serverInventory };
+    playerState.ownedPets = serverOwnedPets;
+    
+    // If user has explicit selection, use their choice instead of server default
+    if (hasExplicitSelection && userSelectedCharacter) {
+      playerState.characterId = userSelectedCharacter;
+    }
+    // If no explicit selection AND no sessions, force null to show picker
+    else if (!hasExplicitSelection && existingPlayer.completed_sessions === 0) {
+      playerState.characterId = null;
+    }
+    // Otherwise, keep whatever the server returned
+    
+    console.log('✅ Loaded player data from server, characterId:', playerState.characterId, 'hasExplicitSelection:', hasExplicitSelection, 'userSelectedCharacter:', userSelectedCharacter, 'ownedPets:', playerState.ownedPets, 'inventory:', playerState.inventory);
+  } else {
+    console.log('ℹ️ New player - starting fresh');
+  }
+  // Apply character sprite from state
+  if (playerState.characterId) {
+    playerSprite.src = `img/char_${playerState.characterId}.png`;
+  } else {
+    playerSprite.src = 'img/char_girl1.png'; // temporary fallback until user picks
+  }
   updateHUD();
   updatePetUI();
-  updateZoom();
-  characterOverlay.style.display='flex';
+  const hasCharSelected = localStorage.getItem(`studyshroom_char_selected_${username}`) === '1' || !!playerState.characterId;
+  characterOverlay.style.display = hasCharSelected ? 'none' : 'flex';
+  console.log('Character picker visible:', !hasCharSelected, 'hasCharSelected:', hasCharSelected);
   updatePlayerPosition();
+
+  // Persist chosen name to server
+  hostingerAPI.savePlayer(playerState);
+}
+
+function startMultiplayerUpdates() {
+  // Update presence every 2 seconds
+  if (multiplayerState.updateInterval) clearInterval(multiplayerState.updateInterval);
+  multiplayerState.updateInterval = setInterval(() => {
+    if (multiplayerState.isLoggedIn) {
+      updatePlayerPresence();
+      fetchOnlinePlayers();
+    }
+  }, 2000);
+  
+  // Update chat every 2 seconds if in cafe
+  if (multiplayerState.chatUpdateInterval) clearInterval(multiplayerState.chatUpdateInterval);
+  multiplayerState.chatUpdateInterval = setInterval(() => {
+    if (multiplayerState.isLoggedIn && multiplayerState.currentLocation === 'cafe') {
+      fetchChatMessages();
+    }
+  }, 2000);
+}
+
+async function updatePlayerPresence() {
+  await hostingerAPI.updatePresence({
+    name: playerState.name,
+    characterId: playerState.characterId,
+    petType: playerState.petType,
+    currentLocation: multiplayerState.currentLocation,
+    x: playerState.x,
+    y: playerState.y
+  });
+}
+
+async function fetchOnlinePlayers() {
+  const players = await hostingerAPI.getOnlinePlayers(multiplayerState.currentLocation);
+  renderOtherPlayers(players);
+  if (onlineCountSpan) onlineCountSpan.textContent = players.length + 1; // +1 for self
+}
+
+function renderOtherPlayers(players) {
+  otherPlayersLayer.innerHTML = '';
+  
+  players.forEach(otherPlayer => {
+    // Create container for this player
+    const playerDiv = document.createElement('div');
+    playerDiv.className = 'other-player';
+    playerDiv.style.position = 'absolute';
+    // Position: if outside, center relative to our camera; if cafe, use absolute
+    if (!inCafe) {
+      const ox = (otherPlayer.x || 0) - playerX;
+      const oy = (otherPlayer.y || 0) - playerY;
+      playerDiv.style.left = (VIEW_W / 2 + ox) + 'px';
+      playerDiv.style.top  = (VIEW_H / 2 + oy) + 'px';
+    } else {
+      playerDiv.style.left = (otherPlayer.x || 0) + 'px';
+      playerDiv.style.top  = (otherPlayer.y || 0) + 'px';
+    }
+    playerDiv.style.display = 'flex';
+    playerDiv.style.flexDirection = 'column';
+    playerDiv.style.alignItems = 'center';
+    
+    // Character sprite
+    const charImg = document.createElement('img');
+    charImg.src = `img/char_${otherPlayer.character_id}.png`;
+    charImg.style.width = '40px';
+    charImg.style.height = '40px';
+    charImg.style.objectFit = 'contain';
+    charImg.onerror = () => { charImg.src = 'img/char_girl1.png'; };
+    playerDiv.appendChild(charImg);
+    
+    // Pet sprite if they have one
+    if (otherPlayer.pet_type) {
+      const petItem = shopItems.find(item => item.petType === otherPlayer.pet_type);
+      if (petItem) {
+        const petImg = document.createElement('img');
+        petImg.src = petItem.imgSrc;
+        petImg.style.width = '30px';
+        petImg.style.height = '30px';
+        petImg.style.objectFit = 'contain';
+        petImg.style.marginTop = '-10px';
+        petImg.onerror = () => { petImg.textContent = petItem.emoji; };
+        playerDiv.appendChild(petImg);
+      }
+    }
+    
+    // Username label
+    const nameDiv = document.createElement('div');
+    nameDiv.textContent = otherPlayer.username;
+    nameDiv.style.fontSize = '0.75rem';
+    nameDiv.style.marginTop = '5px';
+    nameDiv.style.backgroundColor = 'rgba(255,255,255,0.8)';
+    nameDiv.style.padding = '2px 5px';
+    nameDiv.style.borderRadius = '3px';
+    playerDiv.appendChild(nameDiv);
+    
+    otherPlayersLayer.appendChild(playerDiv);
+  });
+}
+
+async function fetchChatMessages() {
+  const messages = await hostingerAPI.getChatMessages('cafe', 50, multiplayerState.lastChatId);
+  if (messages.length > 0) {
+    messages.forEach(msg => {
+      if (msg.id > multiplayerState.lastChatId) {
+        multiplayerState.lastChatId = msg.id;
+        multiplayerState.chatMessages.push(msg);
+      }
+    });
+    // Keep only last 100 messages
+    if (multiplayerState.chatMessages.length > 100) {
+      multiplayerState.chatMessages = multiplayerState.chatMessages.slice(-100);
+    }
+    renderChatMessages();
+  }
+}
+
+function renderChatMessages() {
+  if (!chatMessagesDiv) return;
+  chatMessagesDiv.innerHTML = multiplayerState.chatMessages.map(msg => {
+    return `<div class="chat-message"><strong>${msg.username}:</strong> ${msg.message}</div>`;
+  }).join('');
+  chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+}
+
+// ==================== INIT FUNCTION ====================
+function init(){
+  // Show login overlay first
+  startLogin();
 }
 
 // Ensure init() runs after page is loaded

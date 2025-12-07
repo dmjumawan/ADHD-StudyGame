@@ -70,6 +70,15 @@ switch ($action) {
     case 'stats':
         handleStatsRequest($conn, $method);
         break;
+    case 'presence':
+        handlePresenceRequest($conn, $method);
+        break;
+    case 'online-players':
+        handleOnlinePlayersRequest($conn, $method);
+        break;
+    case 'chat':
+        handleChatRequest($conn, $method);
+        break;
     default:
         http_response_code(404);
         echo json_encode(['error' => 'Endpoint not found']);
@@ -136,19 +145,43 @@ function handlePlayerRequest($conn, $method) {
     } elseif ($method === 'GET') {
         // Get player data
         $userId = $_GET['userId'] ?? null;
+        $username = $_GET['username'] ?? null;
         
-        if (!$userId) {
+        if (!$userId && !$username) {
             http_response_code(400);
-            echo json_encode(['error' => 'Missing userId']);
+            echo json_encode(['error' => 'Missing userId or username']);
             return;
         }
         
-        $userId = $conn->real_escape_string($userId);
-        $sql = "SELECT * FROM players WHERE user_id = '$userId'";
-        $result = $conn->query($sql);
-        
-        if ($result->num_rows > 0) {
-            $row = $result->fetch_assoc();
+        $userIdEsc = $userId ? $conn->real_escape_string($userId) : null;
+        $usernameEsc = $username ? $conn->real_escape_string($username) : null;
+
+        $row = null;
+
+        if ($userIdEsc) {
+            $sql = "SELECT * FROM players WHERE user_id = '$userIdEsc'";
+            $result = $conn->query($sql);
+            if ($result && $result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+            }
+        }
+
+        // Fallback: look up by username (last updated) if userId not found
+        if (!$row && $usernameEsc) {
+            $sql = "SELECT * FROM players WHERE name = '$usernameEsc' ORDER BY updated_at DESC LIMIT 1";
+            $result = $conn->query($sql);
+            if ($result && $result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                // Optionally migrate to provided userId for consistency
+                if ($userIdEsc && $row['user_id'] !== $userIdEsc) {
+                    $migrateSql = "UPDATE players SET user_id = '$userIdEsc' WHERE id = {$row['id']}";
+                    $conn->query($migrateSql);
+                    $row['user_id'] = $userIdEsc;
+                }
+            }
+        }
+
+        if ($row) {
             $row['items'] = json_decode($row['items'], true);
             echo json_encode($row);
         } else {
@@ -252,6 +285,130 @@ function handleStatsRequest($conn, $method) {
         $stats = $result->fetch_assoc();
         
         echo json_encode($stats);
+    }
+}
+
+// ==================== PRESENCE HANDLERS ====================
+function handlePresenceRequest($conn, $method) {
+    if ($method === 'POST') {
+        // Update or create player presence
+        $input = json_decode(file_get_contents('php://input'), true);
+        $userId = $input['userId'] ?? null;
+        $username = $input['username'] ?? 'Player';
+        $characterId = $input['characterId'] ?? 'girl1';
+        $petType = $input['petType'] ?? null;
+        $location = $input['location'] ?? 'world';
+        $x = intval($input['x'] ?? 0);
+        $y = intval($input['y'] ?? 0);
+        
+        if (!$userId) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing userId']);
+            return;
+        }
+        
+        $userId = $conn->real_escape_string($userId);
+        $username = $conn->real_escape_string($username);
+        $characterId = $conn->real_escape_string($characterId);
+        $location = $conn->real_escape_string($location);
+        
+        $sql = "INSERT INTO player_presence (user_id, username, character_id, pet_type, location, x, y, last_heartbeat)
+                VALUES ('$userId', '$username', '$characterId', " . ($petType ? "'$petType'" : "NULL") . ", '$location', $x, $y, NOW())
+                ON DUPLICATE KEY UPDATE
+                username='$username', character_id='$characterId', pet_type=" . ($petType ? "'$petType'" : "NULL") . ", 
+                location='$location', x=$x, y=$y, last_heartbeat=NOW()";
+        
+        if ($conn->query($sql)) {
+            echo json_encode(['success' => true]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => $conn->error]);
+        }
+    }
+}
+
+// ==================== ONLINE PLAYERS HANDLERS ====================
+function handleOnlinePlayersRequest($conn, $method) {
+    if ($method === 'GET') {
+        // Get all online players (heartbeat within last 30 seconds)
+        $location = $_GET['location'] ?? null;
+        $userId = $_GET['userId'] ?? null; // Exclude self
+        
+        $whereClause = "WHERE last_heartbeat > DATE_SUB(NOW(), INTERVAL 30 SECOND)";
+        if ($location) {
+            $location = $conn->real_escape_string($location);
+            $whereClause .= " AND location = '$location'";
+        }
+        if ($userId) {
+            $userId = $conn->real_escape_string($userId);
+            $whereClause .= " AND user_id != '$userId'";
+        }
+        
+        $sql = "SELECT user_id, username, character_id, pet_type, location, x, y FROM player_presence $whereClause";
+        $result = $conn->query($sql);
+        
+        $players = [];
+        while ($row = $result->fetch_assoc()) {
+            $players[] = $row;
+        }
+        
+        echo json_encode($players);
+    }
+}
+
+// ==================== CHAT HANDLERS ====================
+function handleChatRequest($conn, $method) {
+    if ($method === 'POST') {
+        // Send chat message
+        $input = json_decode(file_get_contents('php://input'), true);
+        $userId = $input['userId'] ?? null;
+        $username = $input['username'] ?? 'Anonymous';
+        $message = $input['message'] ?? '';
+        $location = $input['location'] ?? 'cafe';
+        
+        if (!$userId || !$message) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Missing userId or message']);
+            return;
+        }
+        
+        $userId = $conn->real_escape_string($userId);
+        $username = $conn->real_escape_string($username);
+        $message = $conn->real_escape_string($message);
+        $location = $conn->real_escape_string($location);
+        
+        $sql = "INSERT INTO chat_messages (user_id, username, message, location, created_at)
+                VALUES ('$userId', '$username', '$message', '$location', NOW())";
+        
+        if ($conn->query($sql)) {
+            echo json_encode(['success' => true, 'message_id' => $conn->insert_id]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['error' => $conn->error]);
+        }
+    } elseif ($method === 'GET') {
+        // Get chat messages
+        $location = $_GET['location'] ?? 'cafe';
+        $limit = intval($_GET['limit'] ?? 50);
+        $sinceId = intval($_GET['sinceId'] ?? 0);
+        
+        $location = $conn->real_escape_string($location);
+        $whereClause = "WHERE location = '$location'";
+        if ($sinceId > 0) {
+            $whereClause .= " AND id > $sinceId";
+        }
+        
+        $sql = "SELECT id, user_id, username, message, created_at FROM chat_messages $whereClause 
+                ORDER BY created_at DESC LIMIT $limit";
+        $result = $conn->query($sql);
+        
+        $messages = [];
+        while ($row = $result->fetch_assoc()) {
+            $messages[] = $row;
+        }
+        
+        // Return in chronological order (oldest first)
+        echo json_encode(array_reverse($messages));
     }
 }
 ?>

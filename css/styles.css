@@ -191,8 +191,16 @@ main {
   padding: 20px 24px;
   min-width: 320px;
   max-width: 420px;
+  max-height: 80vh;
+  overflow-y: auto;
   box-shadow: 0 10px 24px rgba(18,42,29,0.45);
   border: 1px solid var(--border-soft);
+}
+
+#characterOverlay .overlay-box {
+  min-width: 200px;
+  max-width: 220px;
+  padding: 12px 10px;
 }
 
 .overlay-box h2 {
@@ -336,31 +344,53 @@ main {
 
 .char-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(120px, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  margin-top: 8px;
+  max-width: 240px;
 }
 
 .char-card {
-  border-radius: 14px;
+  border-radius: 6px;
   border: 1px solid #bfdac8;
   background: #f5fbf7;
-  padding: 8px;
+  padding: 3px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   cursor: pointer;
+  box-shadow: 0 2px 4px rgba(23,52,36,0.12);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.char-card:hover {
+  transform: scale(1.05);
   box-shadow: 0 3px 8px rgba(23,52,36,0.2);
 }
 
+
 .char-card img {
-  width: 60px;
+  width: 34px;
   height: auto;
 }
 
 .char-card span {
-  font-size: 0.85rem;
+  font-size: 0.6rem;
+  text-align: center;
+  word-break: break-word;
+}
+
+/* Force any images inside the character overlay to stay tiny (prevents oversized preview images) */
+#characterOverlay img {
+  max-width: 34px;
+  height: auto;
+  display: block;
+}
+
+#characterOverlay .char-grid {
+  margin: 6px auto 0 auto;
+  width: 100%;
 }
 
 /* Interaction prompt (currently unused but harmless) */

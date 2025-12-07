@@ -3,19 +3,30 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cozy Study Island</title>
-  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/styles.css?v=4" />
 </head>
 <body>
   <h1>Cozy Study Island</h1>
 
   <main>
     <div class="left-column">
+      <!-- LOGIN OVERLAY -->
+      <div class="overlay" id="loginOverlay">
+        <div class="overlay-box">
+          <h2>Cozy Study Island</h2>
+          <p>Enter your username to get started!</p>
+          <input type="text" id="usernameInput" placeholder="Enter username" maxlength="50" style="padding: 10px; margin: 10px 0; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 5px;">
+          <button id="loginBtn" style="width: 100%; padding: 10px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">Enter Game</button>
+        </div>
+      </div>
+
       <!-- UI BAR -->
       <div class="ui-bar">
         <div>
           <div class="coins">
             Logged in as: <span id="currentUserLabel">Player</span> ·
-            Currency: <span id="coinCount">0</span> 🍄
+            Currency: <span id="coinCount">0</span> 🍄 · 
+            <span id="onlineCount">0</span> 👥 Online
           </div>
         </div>
 
@@ -44,6 +55,9 @@
         <div id="player">
           <img id="playerSprite" src="img/char_girl1.png" alt="player" />
         </div>
+
+        <!-- Other players sprites layer -->
+        <div id="otherPlayersLayer" style="position: absolute; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none;"></div>
 
         <!-- Pet that follows behind -->
         <div id="petContainer">
@@ -170,7 +184,7 @@
 
   <!-- Load JS at the end so all elements exist (cache-busted) -->
   <!-- Version query param forces browsers/CDNs to fetch the updated file -->
-  <script src="js/hostinger-api.js?v=2"></script>
-  <script src="js/game.js?v=2"></script>
+  <script src="js/hostinger-api.js?v=3"></script>
+  <script src="js/game.js?v=3"></script>
 </body>
 </html>

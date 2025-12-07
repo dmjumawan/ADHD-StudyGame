@@ -25,6 +25,20 @@ class HostingerAPI {
     }
 
     /**
+     * Use the username as the deterministic userId so progress follows you across devices.
+     */
+    setUserIdFromUsername(username) {
+        if (!username) return;
+        const sanitized = username.trim().toLowerCase();
+        this.userId = `user_${sanitized}`;
+        try {
+            localStorage.setItem('studyshroom_userId', this.userId);
+        } catch (e) {
+            console.warn('Could not persist userId to localStorage:', e.message);
+        }
+    }
+
+    /**
      * Generate or retrieve a unique user ID
      */
     getOrCreateUserId() {
@@ -57,13 +71,13 @@ class HostingerAPI {
             const response = await fetch(url, options);
             
             if (!response.ok) {
-                console.error(`API Error: ${response.status}`);
+                console.error(`API Error: ${response.status} for ${endpoint}`);
                 return null;
             }
 
             return await response.json();
         } catch (error) {
-            console.error(`API Request Error: ${error.message}`);
+            console.error(`API Request Error: ${endpoint} -> ${error.message}`);
             return null;
         }
     }
@@ -74,11 +88,17 @@ class HostingerAPI {
     async savePlayer(playerState) {
         console.log('Saving player to Hostinger (or cache if offline):', playerState);
 
+        const itemsPayload = {
+            items: playerState.items || [],
+            inventory: playerState.inventory || {},
+            ownedPets: playerState.ownedPets || []
+        };
+
         const payload = {
             name: playerState.name || 'Player',
             currency: playerState.currency || 0,
-            characterId: playerState.characterId || 'girl1',
-            items: playerState.items || [],
+            characterId: playerState.characterId !== null ? playerState.characterId : 'girl1',
+            items: itemsPayload,
             totalMinutesStudied: playerState.totalMinutesStudied || 0,
             completedSessions: playerState.completedSessions || 0,
             petType: playerState.petType || null,
@@ -136,7 +156,8 @@ class HostingerAPI {
         }
 
         try {
-            const url = `${this.apiUrl}/player?userId=${this.userId}`;
+            const username = localStorage.getItem('studyshroom_username') || '';
+            const url = `${this.apiUrl}/player?userId=${encodeURIComponent(this.userId)}&username=${encodeURIComponent(username)}`;
             const response = await fetch(url, { method: 'GET' });
 
             if (response.status === 404) {
@@ -360,6 +381,105 @@ class HostingerAPI {
             }
         } catch (e) {
             console.error('Failed to flush player cache:', e.message);
+        }
+    }
+
+    /**
+     * Update player presence (online/location)
+     */
+    async updatePresence(playerState) {
+        try {
+            const payload = {
+                userId: this.userId,
+                username: playerState.name || 'Player',
+                characterId: playerState.characterId || 'girl1',
+                petType: playerState.petType || null,
+                location: playerState.currentLocation || 'world',
+                x: playerState.x || 0,
+                y: playerState.y || 0
+            };
+
+            const response = await this.request('presence', 'POST', payload);
+            if (response?.success) {
+                console.log('✅ Presence updated', payload);
+                return true;
+            }
+            console.warn('Presence update failed', response);
+        } catch (error) {
+            console.error('Failed to update presence:', error.message);
+        }
+        return false;
+    }
+
+    /**
+     * Get online players at a location
+     */
+    async getOnlinePlayers(location = 'world') {
+        try {
+            const url = `${this.apiUrl}/online-players?location=${location}&userId=${this.userId}`;
+            const response = await fetch(url, { method: 'GET' });
+            
+            if (!response.ok) {
+                console.error(`API Error: ${response.status} fetching online players`);
+                return [];
+            }
+            
+            const players = await response.json();
+            console.log(`✅ Fetched ${players.length} online players in ${location}`);
+            return players;
+        } catch (error) {
+            console.error(`Failed to get online players: ${error.message}`);
+            return [];
+        }
+    }
+
+    /**
+     * Send a chat message
+     */
+    async sendChat(message, location = 'cafe') {
+        try {
+            const payload = {
+                userId: this.userId,
+                username: localStorage.getItem('studyshroom_username') || 'Anonymous',
+                message: message,
+                location: location
+            };
+
+            const response = await this.request('chat', 'POST', payload);
+            if (response?.success) {
+                console.log('✅ Chat message sent', response);
+                return response.message_id;
+            }
+            console.warn('Chat send failed', response);
+        } catch (error) {
+            console.error('Failed to send chat:', error.message);
+        }
+        return null;
+    }
+
+    /**
+     * Get chat messages
+     */
+    async getChatMessages(location = 'cafe', limit = 50, sinceId = 0) {
+        try {
+            let url = `${this.apiUrl}/chat?location=${location}&limit=${limit}`;
+            if (sinceId > 0) {
+                url += `&sinceId=${sinceId}`;
+            }
+            
+            const response = await fetch(url, { method: 'GET' });
+            
+            if (!response.ok) {
+                console.error(`API Error: ${response.status} fetching chat`);
+                return [];
+            }
+            
+            const messages = await response.json();
+            console.log(`✅ Fetched ${messages.length} chat messages (since ${sinceId})`);
+            return messages;
+        } catch (error) {
+            console.error(`Failed to get chat messages: ${error.message}`);
+            return [];
         }
     }
 }
