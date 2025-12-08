@@ -233,7 +233,7 @@ main {
   margin: 8px 0;
   background: #e2f5eb;
   border-radius: 14px;
-  overflow: hidden;
+  overflow: visible;
   border: 1px solid #b8dac5;
 }
 
@@ -260,6 +260,7 @@ main {
   font-size: 1.1rem;
   animation: floatUp 3s ease-out forwards;
   opacity: 0.9;
+  z-index: 1;
 }
 
 @keyframes floatUp {
@@ -523,13 +524,14 @@ button:disabled {
 
 .focus-gif {
   position: absolute;
-  left: 50%;
   top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
   height: 90px;       /* fits inside box */
   max-width: 90%;      /* prevents sides from overflowing */
   object-fit: contain; /* keeps it centered */
   pointer-events: none;
+  z-index: 2;
 }
 
 /* CHAT BOX */

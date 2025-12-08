@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cozy Study Island</title>
-  <link rel="stylesheet" href="css/styles.css?v=4" />
+  <link rel="stylesheet" href="css/styles.css?v=7" />
 </head>
 <body>
   <h1>Cozy Study Island</h1>
@@ -75,8 +75,9 @@
             <p>Work on your task while this overlay is open. Your session will be recorded.</p>
             <div class="big-timer" id="studyTimer">00:00</div>
             <p style="font-size: 0.9rem; margin-top: 0;">1 mushroom per minute</p>
-            <div class="bubble-track" id="bubbleContainer"></div>
-            <img id="focusGif" class="focus-gif" src="img/focusGirl.gif" alt="gif">
+            <div class="bubble-track" id="bubbleContainer">
+              <img id="focusGif" class="focus-gif" src="img/focusGirl.gif" alt="gif">
+            </div>
             <button id="stopStudyOverlayBtn">Stop Studying</button>
           </div>
         </div>
@@ -185,6 +186,6 @@
   <!-- Load JS at the end so all elements exist (cache-busted) -->
   <!-- Version query param forces browsers/CDNs to fetch the updated file -->
   <script src="js/hostinger-api.js?v=3"></script>
-  <script src="js/game.js?v=3"></script>
+  <script src="js/game.js?v=4"></script>
 </body>
 </html>

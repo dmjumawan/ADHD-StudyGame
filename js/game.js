@@ -300,7 +300,9 @@ function startStudySession(){
   isStudying = true;
   studySessionStartTime = Date.now();
   studyOverlay.style.display = 'flex';
-  bubbleContainer.innerHTML = '';
+  // Clear only bubble elements, not the focus GIF
+  const bubbles = bubbleContainer.querySelectorAll('.leaf-bubble');
+  bubbles.forEach(b => b.remove());
   startBtn.disabled = true;
   stopBtn.disabled = false;
   openShopBtn.disabled = true;
