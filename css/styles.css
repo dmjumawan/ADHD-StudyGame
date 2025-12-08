@@ -704,3 +704,113 @@ button:disabled {
   font-size: 0.95rem;
 }
 
+/* MUSIC PLAYER */
+.music-player {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 280px;
+  background: var(--cream);
+  border-radius: 12px;
+  border: 2px solid var(--border-soft);
+  box-shadow: 0 6px 16px rgba(22,48,32,0.25);
+  z-index: 30;
+  padding: 12px;
+}
+
+.music-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #2f5b43;
+}
+
+.music-header .close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #466652;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+}
+
+.music-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.music-controls button {
+  background: #e8f5ed;
+  border: 1px solid #b8dac5;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.music-controls button:hover {
+  background: #d0ecd9;
+  transform: scale(1.05);
+}
+
+.track-info {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #466652;
+  margin-bottom: 10px;
+  height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.volume-control input[type="range"] {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: #d0ecd9;
+  outline: none;
+  -webkit-appearance: none;
+}
+
+.volume-control input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4a8a5f;
+  cursor: pointer;
+}
+
+.volume-control input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #4a8a5f;
+  cursor: pointer;
+  border: none;
+}
+
+#volumeLabel {
+  font-size: 0.8rem;
+  color: #466652;
+  min-width: 35px;
+  text-align: right;
+}
+

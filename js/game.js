@@ -111,6 +111,129 @@ const ownedPetsContainer = document.getElementById("ownedPetsContainer");
 const fishContainer     = document.getElementById("fishContainer");
 const snacksContainer   = document.getElementById("snacksContainer");
 
+// Music Player DOM references
+const toggleMusicBtn    = document.getElementById("toggleMusicBtn");
+const musicPlayer       = document.getElementById("musicPlayer");
+const closeMusicBtn     = document.getElementById("closeMusicBtn");
+const playPauseBtn      = document.getElementById("playPauseBtn");
+const prevTrackBtn      = document.getElementById("prevTrackBtn");
+const nextTrackBtn      = document.getElementById("nextTrackBtn");
+const volumeSlider      = document.getElementById("volumeSlider");
+const volumeLabel       = document.getElementById("volumeLabel");
+const trackInfo         = document.getElementById("trackInfo");
+const musicAudio        = document.getElementById("musicAudio");
+
+// ------------------ MUSIC PLAYER ------------------
+const musicPlaylist = [
+  { name: "Cozy Jazz Cafe", url: "music/cozy-jazz-cafe-relaxing-podcast-r-background-music-202447.mp3" },
+  { name: "Cozy Room Piano Jazz", url: "music/cozy-room-piano-jazz-lo-fi-259193.mp3" },
+  { name: "Christmas Jazz", url: "music/the-christmas-jazz-436621.mp3" }
+];
+
+let currentTrackIndex = 0;
+let isPlaying = false;
+
+// Initialize music player
+function initMusicPlayer() {
+  // Load saved volume preference
+  const savedVolume = localStorage.getItem('studyshroom_music_volume');
+  if (savedVolume !== null) {
+    volumeSlider.value = savedVolume;
+    musicAudio.volume = savedVolume / 100;
+    volumeLabel.textContent = `${savedVolume}%`;
+  } else {
+    musicAudio.volume = 0.5;
+  }
+
+  // Toggle music player visibility
+  toggleMusicBtn.addEventListener('click', () => {
+    musicPlayer.style.display = musicPlayer.style.display === 'none' ? 'block' : 'none';
+  });
+
+  closeMusicBtn.addEventListener('click', () => {
+    musicPlayer.style.display = 'none';
+  });
+
+  // Play/Pause
+  playPauseBtn.addEventListener('click', togglePlayPause);
+
+  // Previous track
+  prevTrackBtn.addEventListener('click', () => {
+    currentTrackIndex = (currentTrackIndex - 1 + musicPlaylist.length) % musicPlaylist.length;
+    loadTrack();
+    if (isPlaying) musicAudio.play();
+  });
+
+  // Next track
+  nextTrackBtn.addEventListener('click', () => {
+    currentTrackIndex = (currentTrackIndex + 1) % musicPlaylist.length;
+    loadTrack();
+    if (isPlaying) musicAudio.play();
+  });
+
+  // Volume control
+  volumeSlider.addEventListener('input', (e) => {
+    const volume = e.target.value;
+    musicAudio.volume = volume / 100;
+    volumeLabel.textContent = `${volume}%`;
+    localStorage.setItem('studyshroom_music_volume', volume);
+  });
+
+  // Auto-advance to next track when current track ends
+  musicAudio.addEventListener('ended', () => {
+    currentTrackIndex = (currentTrackIndex + 1) % musicPlaylist.length;
+    loadTrack();
+    musicAudio.play();
+  });
+
+  // Update UI when track is ready
+  musicAudio.addEventListener('loadeddata', () => {
+    updateTrackInfo();
+  });
+}
+
+function loadTrack() {
+  const track = musicPlaylist[currentTrackIndex];
+  console.log('Loading track:', track.name, track.url);
+  musicAudio.src = track.url;
+  musicAudio.load(); // Force reload
+  updateTrackInfo();
+}
+
+function togglePlayPause() {
+  if (isPlaying) {
+    musicAudio.pause();
+    playPauseBtn.textContent = '▶️';
+    isPlaying = false;
+    console.log('Music paused');
+  } else {
+    if (!musicAudio.src) {
+      loadTrack();
+    }
+    console.log('Attempting to play music...');
+    console.log('Audio element:', musicAudio);
+    console.log('Audio src:', musicAudio.src);
+    console.log('Audio volume:', musicAudio.volume);
+    
+    musicAudio.play().then(() => {
+      console.log('Music playing successfully!');
+      playPauseBtn.textContent = '⏸️';
+      isPlaying = true;
+    }).catch(err => {
+      console.error('Audio play failed:', err);
+      alert('Audio play failed: ' + err.message + '\nCheck console for details.');
+      trackInfo.textContent = 'Error: ' + err.message;
+      playPauseBtn.textContent = '▶️';
+      isPlaying = false;
+    });
+  }
+}
+
+function updateTrackInfo() {
+  const track = musicPlaylist[currentTrackIndex];
+  trackInfo.textContent = `${currentTrackIndex + 1}/${musicPlaylist.length}: ${track.name}`;
+}
+
 // ------------------ WORLD / MOVEMENT ------------------
 const VIEW_W = 1100, VIEW_H = 600;
 const WORLD_W = 3000, WORLD_H = 3000;
@@ -917,6 +1040,8 @@ function renderChatMessages() {
 
 // ==================== INIT FUNCTION ====================
 function init(){
+  // Initialize music player
+  initMusicPlayer();
   // Show login overlay first
   startLogin();
 }

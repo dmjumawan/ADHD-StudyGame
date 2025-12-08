@@ -37,11 +37,32 @@
           <button id="openInventoryBtn">Inventory</button>
           <button id="toggleViewBtn">Go to Café</button>
           <button id="feedPetBtn">Feed Pet</button>
+          <button id="toggleMusicBtn">🎵</button>
           <button id="zoomOutBtn">-</button>
           <button id="zoomInBtn">+</button>
           <button id="fullscreenBtn">Full Screen</button>
           <span class="hint">Food: <span id="foodCount">0</span></span>
         </div>
+      </div>
+
+      <!-- MUSIC PLAYER -->
+      <div class="music-player" id="musicPlayer" style="display: none;">
+        <div class="music-header">
+          <span>🎵 Study Music</span>
+          <button id="closeMusicBtn" class="close-btn">×</button>
+        </div>
+        <div class="music-controls">
+          <button id="prevTrackBtn">⏮</button>
+          <button id="playPauseBtn">▶️</button>
+          <button id="nextTrackBtn">⏭</button>
+        </div>
+        <div class="track-info" id="trackInfo">No track playing</div>
+        <div class="volume-control">
+          <span>🔊</span>
+          <input type="range" id="volumeSlider" min="0" max="100" value="50">
+          <span id="volumeLabel">50%</span>
+        </div>
+        <audio id="musicAudio" preload="none"></audio>
       </div>
 
       <!-- GAME AREA -->
@@ -186,6 +207,6 @@
   <!-- Load JS at the end so all elements exist (cache-busted) -->
   <!-- Version query param forces browsers/CDNs to fetch the updated file -->
   <script src="js/hostinger-api.js?v=3"></script>
-  <script src="js/game.js?v=4"></script>
+  <script src="js/game.js?v=11"></script>
 </body>
 </html>
