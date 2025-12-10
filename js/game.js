@@ -133,6 +133,123 @@ const musicPlaylist = [
 let currentTrackIndex = 0;
 let isPlaying = false;
 
+// ==================== TODO LIST ==================== 
+const todoInput = document.getElementById('todoInput');
+const addTodoBtn = document.getElementById('addTodoBtn');
+const todoItems = document.getElementById('todoItems');
+const toggleTodoBtn = document.getElementById('toggleTodoBtn');
+const todoList = document.getElementById('todoList');
+
+let todos = [];
+
+function loadTodos() {
+  const stored = localStorage.getItem('studyshroom_todos');
+  if (stored) {
+    todos = JSON.parse(stored);
+    renderTodos();
+  }
+}
+
+function saveTodos() {
+  localStorage.setItem('studyshroom_todos', JSON.stringify(todos));
+}
+
+function addTodo() {
+  const text = todoInput.value.trim();
+  if (!text) return;
+  
+  const todo = {
+    id: Date.now(),
+    text: text,
+    completed: false
+  };
+  
+  todos.push(todo);
+  saveTodos();
+  renderTodos();
+  todoInput.value = '';
+  todoInput.focus();
+}
+
+function toggleTodo(id) {
+  const todo = todos.find(t => t.id === id);
+  if (todo) {
+    todo.completed = !todo.completed;
+    saveTodos();
+    renderTodos();
+    
+    // Award 5 mushrooms for completing task
+    if (todo.completed) {
+      playerState.currency += 5;
+      updateHUD();
+      hostingerAPI.savePlayer(playerState);
+      
+      // Show reward notification
+      const todoEl = document.querySelector(`[data-todo-id="${id}"]`);
+      if (todoEl) {
+        const reward = document.createElement('div');
+        reward.textContent = '+5 🍄';
+        reward.style.cssText = 'position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #8bc34a; font-weight: bold; animation: fadeOut 1.5s forwards;';
+        todoEl.style.position = 'relative';
+        todoEl.appendChild(reward);
+        setTimeout(() => reward.remove(), 1500);
+      }
+    }
+  }
+}
+
+function deleteTodo(id) {
+  todos = todos.filter(t => t.id !== id);
+  saveTodos();
+  renderTodos();
+}
+
+function renderTodos() {
+  todoItems.innerHTML = '';
+  todos.forEach(todo => {
+    const div = document.createElement('div');
+    div.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+    div.setAttribute('data-todo-id', todo.id);
+    
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.className = 'todo-checkbox';
+    checkbox.checked = todo.completed;
+    checkbox.addEventListener('change', () => toggleTodo(todo.id));
+    
+    const text = document.createElement('span');
+    text.className = 'todo-text';
+    text.textContent = todo.text;
+    text.addEventListener('click', () => toggleTodo(todo.id));
+    
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'todo-delete';
+    deleteBtn.textContent = '✕';
+    deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
+    
+    div.appendChild(checkbox);
+    div.appendChild(text);
+    div.appendChild(deleteBtn);
+    todoItems.appendChild(div);
+  });
+}
+
+// Toggle todo list collapse
+toggleTodoBtn.addEventListener('click', () => {
+  const isCollapsed = todoItems.style.display === 'none';
+  todoItems.style.display = isCollapsed ? 'block' : 'none';
+  document.querySelector('.todo-input-area').style.display = isCollapsed ? 'flex' : 'none';
+  toggleTodoBtn.textContent = isCollapsed ? '−' : '+';
+});
+
+// Add todo on button click
+addTodoBtn.addEventListener('click', addTodo);
+
+// Add todo on Enter key
+todoInput.addEventListener('keypress', (e) => {
+  if (e.key === 'Enter') addTodo();
+});
+
 // Initialize music player
 function initMusicPlayer() {
   // Load saved volume preference
@@ -759,7 +876,11 @@ function showFishingPopup(pondNumber){
   catchMessage.style.display='none';
   fishingGif.style.display='block';
   fishingOverlay.style.display='flex';
-  fishingGif.src='img/fishing.gif';
+  
+  // Use character-specific fishing GIF based on selected character
+  const charId = playerState.characterId || 'girl1';
+  fishingGif.src = `img/${charId}_fish.gif`;
+  
   setTimeout(()=>{
     fishingGif.style.display='none';
     const fishName = ponds[pondNumber-1].fish || 'Fish';
@@ -925,7 +1046,7 @@ function startMultiplayerUpdates() {
       updatePlayerPresence();
       fetchOnlinePlayers();
     }
-  }, 2000);
+  }, 42);
   
   // Update chat every 2 seconds if in cafe
   if (multiplayerState.chatUpdateInterval) clearInterval(multiplayerState.chatUpdateInterval);
@@ -1042,6 +1163,8 @@ function renderChatMessages() {
 function init(){
   // Initialize music player
   initMusicPlayer();
+  // Load todos
+  loadTodos();
   // Show login overlay first
   startLogin();
 }

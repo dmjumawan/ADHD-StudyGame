@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Cozy Study Island</title>
-  <link rel="stylesheet" href="css/styles.css?v=7" />
+  <link rel="stylesheet" href="css/styles.css?v=8" />
 </head>
 <body>
   <h1>Cozy Study Island</h1>
@@ -191,6 +191,19 @@
         <!-- CHAT TOGGLE BUTTON -->
         <button id="openChatBtn" class="open-chat-btn" style="display: none;">💬</button>
 
+        <!-- TODO LIST SIDEBAR -->
+        <div id="todoList" class="todo-list">
+          <div class="todo-header">
+            <h3>📝 To Do</h3>
+            <button id="toggleTodoBtn" class="toggle-todo-btn">−</button>
+          </div>
+          <div id="todoItems" class="todo-items"></div>
+          <div class="todo-input-area">
+            <input type="text" id="todoInput" placeholder="Add a task..." maxlength="50">
+            <button id="addTodoBtn">+</button>
+          </div>
+        </div>
+
         <!-- TAB NOTIFICATION POPUP -->
         <div id="tabNotification" class="tab-notification" style="display: none;">
           <div class="tab-notification-content">
@@ -207,6 +220,6 @@
   <!-- Load JS at the end so all elements exist (cache-busted) -->
   <!-- Version query param forces browsers/CDNs to fetch the updated file -->
   <script src="js/hostinger-api.js?v=3"></script>
-  <script src="js/game.js?v=11"></script>
+  <script src="js/game.js?v=17"></script>
 </body>
 </html>
